@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import confetti from "canvas-confetti";
 import type { PaymentStatus } from "@/types";
 import { formatAmount } from "@/utils/formatting";
@@ -17,7 +18,9 @@ interface Props {
 
 function playSuccessChime(): void {
   try {
-    const Ctx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    const Ctx =
+      window.AudioContext ||
+      (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
     const ctx = new Ctx();
     const now = ctx.currentTime;
     const notes = [523.25, 659.25, 783.99, 1046.5]; // C5 E5 G5 C6
@@ -41,12 +44,38 @@ function playSuccessChime(): void {
   }
 }
 
+function playFailureChime(): void {
+  try {
+    const Ctx =
+      window.AudioContext ||
+      (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    const ctx = new Ctx();
+    const now = ctx.currentTime;
+    const notes = [220.0, 196.0]; // A3 G3
+    notes.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sawtooth";
+      osc.frequency.value = freq;
+      const start = now + i * 0.15;
+      const end = start + 0.4;
+      gain.gain.setValueAtTime(0.2, start);
+      gain.gain.linearRampToValueAtTime(0.0001, end);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(start);
+      osc.stop(end + 0.05);
+    });
+    setTimeout(() => void ctx.close(), 2000);
+  } catch {
+    /* audio not available */
+  }
+}
+
 function fireFireworks(): void {
   const duration = 3500;
   const end = Date.now() + duration;
   const colors = ["#ff4d8d", "#ffd166", "#06d6a0", "#118ab2", "#ef476f", "#9b5de5"];
 
-  // Initial big burst
   confetti({
     particleCount: 160,
     spread: 90,
@@ -60,7 +89,6 @@ function fireFireworks(): void {
       window.clearInterval(interval);
       return;
     }
-    // Left firework
     confetti({
       particleCount: 60,
       angle: 60,
@@ -70,7 +98,6 @@ function fireFireworks(): void {
       colors,
       shapes: ["circle", "square"],
     });
-    // Right firework
     confetti({
       particleCount: 60,
       angle: 120,
@@ -103,87 +130,118 @@ export function StatusScreen({
     if (status === "success") {
       playSuccessChime();
       fireFireworks();
+    } else if (status === "failed" || status === "timeout") {
+      playFailureChime();
     }
   }, [status]);
 
   return (
-    <div
-      ref={focusRef}
-      tabIndex={-1}
-      role="status"
-      aria-live="polite"
-      className="rounded-2xl border border-border bg-card p-8 shadow-elegant outline-none focus:ring-2 focus:ring-ring"
-    >
-      {status === "processing" && (
-        <div className="flex flex-col items-center text-center gap-4">
-          <Spinner />
-          <h2 className="text-lg font-semibold">Processing your payment…</h2>
-          <p className="text-sm text-muted-foreground">
-            Please don't close this window. Attempt {attempt} of {maxAttempts}.
-          </p>
-        </div>
-      )}
-
-      {status === "success" && (
-        <div className="flex flex-col items-center text-center gap-4 animate-scale-in">
-          <div className="h-16 w-16 rounded-full bg-success/15 text-success grid place-items-center text-4xl ring-4 ring-success/20 animate-pulse">
-            ✓
-          </div>
-          <h2 className="text-2xl font-bold tracking-tight">Payment successful 🎉</h2>
-          <div className="text-3xl font-bold font-mono bg-gradient-brand bg-clip-text text-transparent">
-            {formatAmount(amount)}
-          </div>
-          {txnId && (
-            <p className="text-xs text-muted-foreground break-all">
-              Transaction ID: <span className="font-mono">{txnId}</span>
-            </p>
-          )}
-          <button
-            onClick={onReset}
-            className="mt-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-95"
-          >
-            New payment
-          </button>
-        </div>
-      )}
-
-      {(status === "failed" || status === "timeout") && (
-        <div className="flex flex-col items-center text-center gap-4">
-          <div className="h-14 w-14 rounded-full bg-destructive/15 text-destructive grid place-items-center text-3xl">
-            {status === "timeout" ? "⏱" : "✕"}
-          </div>
-          <h2 className="text-xl font-semibold">
-            {status === "timeout" ? "Payment timed out" : "Payment failed"}
-          </h2>
-          <p className="text-sm text-muted-foreground max-w-sm">
-            {failureReason ?? "Something went wrong. Please try again."}
-          </p>
-          <p className="text-xs text-muted-foreground">
-            Attempt {attempt} of {maxAttempts}
-          </p>
-          <div className="flex gap-2 mt-2">
-            {canRetry ? (
-              <button
-                onClick={onRetry}
-                className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-95"
-              >
-                Retry payment
-              </button>
-            ) : (
-              <p className="text-sm text-destructive">
-                Maximum attempts reached. Please start a new payment.
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={status}
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.95 }}
+        transition={{ duration: 0.3 }}
+        ref={focusRef}
+        tabIndex={-1}
+        role="status"
+        aria-live="polite"
+        className={`rounded-2xl border border-border bg-card/50 p-8 shadow-elegant outline-none focus:ring-2 focus:ring-primary/20 backdrop-blur-md ${
+          status === "failed" || status === "timeout" ? "animate-shake" : ""
+        }`}
+      >
+        {status === "processing" && (
+          <div className="flex flex-col items-center text-center gap-6">
+            <Spinner />
+            <div className="space-y-2">
+              <h2 className="text-xl font-bold">Processing Securely</h2>
+              <p className="text-sm text-muted-foreground">
+                Authorizing your payment. Attempt {attempt} of {maxAttempts}.
               </p>
-            )}
-            <button
-              onClick={onReset}
-              className="rounded-lg border border-border px-4 py-2 text-sm font-semibold hover:bg-accent"
-            >
-              Start over
-            </button>
+            </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+
+        {status === "success" && (
+          <div className="flex flex-col items-center text-center gap-6">
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", damping: 12, stiffness: 200 }}
+              className="h-20 w-20 rounded-full bg-success/15 text-success grid place-items-center text-5xl ring-8 ring-success/10"
+            >
+              ✓
+            </motion.div>
+            <div className="space-y-2">
+              <h2 className="text-2xl font-black tracking-tight">Payment Successful!</h2>
+              <div className="text-4xl font-black font-mono text-primary">
+                {formatAmount(amount)}
+              </div>
+            </div>
+            {txnId && (
+              <div className="px-4 py-2 bg-muted/40 rounded-lg border border-border/50">
+                <p className="text-[10px] uppercase font-bold text-muted-foreground mb-1 tracking-widest">
+                  Transaction ID
+                </p>
+                <p className="text-xs font-mono break-all">{txnId}</p>
+              </div>
+            )}
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={onReset}
+              className="mt-4 w-full rounded-xl bg-primary px-6 py-3 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/20"
+            >
+              Start New Payment
+            </motion.button>
+          </div>
+        )}
+
+        {(status === "failed" || status === "timeout") && (
+          <div className="flex flex-col items-center text-center gap-6">
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              className="h-16 w-16 rounded-full bg-destructive/15 text-destructive grid place-items-center text-4xl ring-8 ring-destructive/10"
+            >
+              {status === "timeout" ? "⏱" : "✕"}
+            </motion.div>
+            <div className="space-y-2">
+              <h2 className="text-xl font-bold text-destructive">
+                {status === "timeout" ? "Payment Timed Out" : "Payment Failed"}
+              </h2>
+              <p className="text-sm text-muted-foreground max-w-sm px-4">
+                {failureReason ?? "We couldn't authorize your card. Please check your details."}
+              </p>
+            </div>
+            <div className="text-xs font-medium text-muted-foreground/60">
+              Final attempt {attempt} of {maxAttempts}
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3 w-full mt-2">
+              {canRetry && (
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={onRetry}
+                  className="flex-1 rounded-xl bg-primary px-4 py-3 text-sm font-bold text-primary-foreground shadow-lg"
+                >
+                  Retry Payment
+                </motion.button>
+              )}
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={onReset}
+                className="flex-1 rounded-xl border border-border bg-background px-4 py-3 text-sm font-bold hover:bg-accent"
+              >
+                Start Over
+              </motion.button>
+            </div>
+          </div>
+        )}
+      </motion.div>
+    </AnimatePresence>
   );
 }
 

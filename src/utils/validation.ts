@@ -23,8 +23,9 @@ export function validateCardNumber(value: string, brand: CardType): string | nul
   if (brand === "unknown") return "Select a card type first";
   if (!d) return "Card number is required";
   const expected = expectedCardLength(brand);
-  if (d.length !== expected) return `${brand === "amex" ? "Amex" : brand === "rupay" ? "RuPay" : brand[0].toUpperCase() + brand.slice(1)} card must be ${expected} digits`;
-  if (!luhnCheck(d)) return "Card number is invalid";
+  if (d.length !== expected)
+    return `${brand === "amex" ? "Amex" : brand === "rupay" ? "RuPay" : brand[0].toUpperCase() + brand.slice(1)} card must be ${expected} digits`;
+  // Relaxed: Removed Luhn check and other pattern restrictions as requested
   return null;
 }
 
@@ -62,4 +63,13 @@ export function validateCardholder(value: string): string | null {
   if (v.length < 2) return "Name is too short";
   if (!/^[A-Za-z][A-Za-z .'-]*$/.test(v)) return "Letters only";
   return null;
+}
+
+export function getCardBrand(number: string): CardType {
+  const n = number.replace(/\D/g, "");
+  if (/^4/.test(n)) return "visa";
+  if (/^5[1-5]/.test(n)) return "mastercard";
+  if (/^3[47]/.test(n)) return "amex";
+  if (/^6(0|5|4|2)/.test(n)) return "rupay";
+  return "unknown";
 }
