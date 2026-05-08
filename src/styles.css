@@ -1,7 +1,7 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@500;700&display=swap');
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
-@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@500;700&display=swap");
 
 @custom-variant dark (&:is(.dark *));
 
@@ -74,7 +74,7 @@
 }
 
 .dark {
-  --background: #020202; /* Force absolute dark background */
+  --background: #020202;
   --foreground: #ffffff;
   --card: rgba(20, 20, 25, 0.4);
   --card-foreground: #ffffff;
@@ -102,56 +102,54 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
-    font-family: "Outfit", sans-serif;
+    font-family: 'Outfit', sans-serif;
     overflow-x: hidden;
     @apply transition-colors duration-500;
   }
 }
 
 @utility bg-mesh {
-  background-image:
+  background-image: 
     radial-gradient(at 0% 0%, oklch(0.55 0.2 270 / 0.04) 0px, transparent 50%),
     radial-gradient(at 100% 0%, oklch(0.6 0.2 330 / 0.04) 0px, transparent 50%),
     radial-gradient(at 100% 100%, oklch(0.65 0.2 200 / 0.04) 0px, transparent 50%),
     radial-gradient(at 0% 100%, oklch(0.7 0.2 300 / 0.04) 0px, transparent 50%);
   background-attachment: fixed;
-}
 
-.dark @utility bg-mesh {
-  background-image:
-    radial-gradient(at 0% 0%, oklch(0.65 0.2 270 / 0.15) 0px, transparent 50%),
-    radial-gradient(at 100% 0%, oklch(0.6 0.2 330 / 0.15) 0px, transparent 50%),
-    radial-gradient(at 100% 100%, oklch(0.65 0.2 200 / 0.15) 0px, transparent 50%),
-    radial-gradient(at 0% 100%, oklch(0.7 0.2 300 / 0.15) 0px, transparent 50%);
+  @variant dark {
+    background-image: 
+      radial-gradient(at 0% 0%, oklch(0.65 0.2 270 / 0.15) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, oklch(0.6 0.2 330 / 0.15) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, oklch(0.65 0.2 200 / 0.15) 0px, transparent 50%),
+      radial-gradient(at 0% 100%, oklch(0.7 0.2 300 / 0.15) 0px, transparent 50%);
+  }
 }
 
 @utility glass-premium {
   background: rgba(255, 255, 255, 0.75);
   backdrop-filter: blur(25px) saturate(200%);
   border: 1px solid rgba(255, 255, 255, 0.8);
-}
 
-.dark @utility glass-premium {
-  background: #050505 !important; /* Force absolute dark */
-  backdrop-filter: none !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  @variant dark {
+    background: #050505 !important;
+    backdrop-filter: none !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  }
 }
 
 @utility glass-card {
   background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.7);
-}
 
-.dark @utility glass-card {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  @variant dark {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
 }
 
 @utility shadow-3d-dark {
-  box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.1),
-    0 20px 40px -5px rgba(0, 0, 0, 0.8);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1), 0 20px 40px -5px rgba(0, 0, 0, 0.8);
 }
 
 @utility perspective-2000 {
@@ -167,13 +165,8 @@
 }
 
 @keyframes float-3d {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
 }
 
 @utility animate-float-3d {
@@ -182,10 +175,10 @@
 
 @utility text-glow {
   text-shadow: 0 0 10px oklch(0.55 0.2 270 / 0.1);
-}
 
-.dark @utility text-glow {
-  text-shadow: 0 0 20px oklch(0.55 0.2 270 / 0.4);
+  @variant dark {
+    text-shadow: 0 0 20px oklch(0.55 0.2 270 / 0.4);
+  }
 }
 
 .scrollbar-thin::-webkit-scrollbar {
