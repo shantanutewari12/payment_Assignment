@@ -1,11 +1,12 @@
 {
   "version": 2,
+  "cleanUrls": true,
   "framework": "vite",
+  "outputDirectory": "dist/client",
   "rewrites": [
     {
       "source": "/(.*)",
-      "destination": "/"
+      "destination": "/index.html"
     }
-  ],
-  "cleanUrls": true
+  ]
 }
