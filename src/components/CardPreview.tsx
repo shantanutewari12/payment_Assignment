@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { memo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { CardType } from "@/types";
 
@@ -10,7 +10,13 @@ interface Props {
   onClick?: () => void;
 }
 
-export function CardPreview({ cardNumber, cardholderName, expiry, brand, onClick }: Props) {
+export const CardPreview = memo(function CardPreview({
+  cardNumber,
+  cardholderName,
+  expiry,
+  brand,
+  onClick,
+}: Props) {
   const [isFlipped, setIsFlipped] = useState(false);
 
   const handleCardClick = (e: React.MouseEvent) => {
@@ -22,7 +28,7 @@ export function CardPreview({ cardNumber, cardholderName, expiry, brand, onClick
 
   return (
     <div
-      className="relative w-full max-w-[440px] aspect-[1.6/1] perspective-2000 cursor-pointer group select-none"
+      className="relative w-full max-w-[440px] aspect-[1.6/1] perspective-2000 cursor-pointer group select-none will-change-transform"
       onClick={handleCardClick}
     >
       <motion.div
@@ -133,4 +139,4 @@ export function CardPreview({ cardNumber, cardholderName, expiry, brand, onClick
       </motion.div>
     </div>
   );
-}
+});

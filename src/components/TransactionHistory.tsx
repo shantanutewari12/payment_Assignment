@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import { jsPDF } from "jspdf";
 import { usePaymentStore } from "@/store/paymentStore";
 import type { Transaction } from "@/types";
@@ -12,7 +12,7 @@ const statusStyles: Record<string, string> = {
   idle: "bg-muted text-muted-foreground",
 };
 
-export function TransactionHistory() {
+export const TransactionHistory = memo(function TransactionHistory() {
   const history = usePaymentStore((s) => s.transactionHistory);
   const hydrate = usePaymentStore((s) => s.hydrate);
   const [selected, setSelected] = useState<Transaction | null>(null);
@@ -195,7 +195,8 @@ export function TransactionHistory() {
       )}
     </section>
   );
-}
+});
+
 
 function DetailRow({
   label,

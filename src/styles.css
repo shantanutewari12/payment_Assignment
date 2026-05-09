@@ -1,5 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@500;700&display=swap');
-@import "tailwindcss" source(none);
+@import "tailwindcss";
 @source "../src";
 @import "tw-animate-css";
 
@@ -171,6 +171,14 @@
 
 @utility animate-float-3d {
   animation: float-3d 10s ease-in-out infinite;
+}
+
+@utility will-change-transform {
+  will-change: transform;
+}
+
+@utility will-change-opacity {
+  will-change: opacity;
 }
 
 @utility text-glow {

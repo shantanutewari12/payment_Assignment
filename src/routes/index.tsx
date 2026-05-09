@@ -79,10 +79,10 @@ function Index() {
   return (
     <main className="min-h-screen bg-mesh relative selection:bg-primary/30 transition-colors duration-500">
       {/* Background Decorative Elements */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden opacity-30 dark:opacity-50 transition-opacity duration-700">
-        <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-primary/10 blur-[140px] rounded-full animate-float-3d" />
+      <div className="fixed inset-0 pointer-events-none overflow-hidden opacity-20 dark:opacity-40 transition-opacity duration-700">
+        <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-primary/10 blur-[80px] rounded-full animate-float-3d will-change-transform" />
         <div
-          className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-purple-500/5 blur-[140px] rounded-full animate-float-3d"
+          className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-purple-500/5 blur-[80px] rounded-full animate-float-3d will-change-transform"
           style={{ animationDelay: "-5s" }}
         />
       </div>

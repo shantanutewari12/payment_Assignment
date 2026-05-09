@@ -6,12 +6,7 @@ import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
 
 // Standard SPA Vite config to ensure Vercel compatibility
 export default defineConfig({
-  plugins: [
-    TanStackRouterVite(),
-    react(),
-    tailwindcss(),
-    tsconfigPaths(),
-  ],
+  plugins: [TanStackRouterVite(), react(), tailwindcss(), tsconfigPaths()],
   build: {
     outDir: "dist",
     rollupOptions: {
