@@ -1,9 +1,10 @@
 import { createRoot } from "react-dom/client";
-import { StartClient } from "@tanstack/react-start";
+import { RouterProvider } from "@tanstack/react-router";
 import { getRouter } from "./router";
 
 const router = getRouter();
 
+// For static SPA, we use RouterProvider instead of StartClient
 createRoot(document.getElementById("root")!).render(
-  <StartClient router={router} />
+  <RouterProvider router={router} />
 );
