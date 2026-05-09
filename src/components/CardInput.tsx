@@ -1,4 +1,4 @@
-import { useId, useState } from "react";
+import { useId, useState, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Eye, EyeOff } from "lucide-react";
 import type { CardType } from "@/types";
@@ -25,48 +25,55 @@ export function CardInput({ value, onChange, onSubmit, disabled }: Props) {
   const [focusedField, setFocusedField] = useState<string | null>(null);
   const [showCVV, setShowCVV] = useState(false);
 
-  const formatCardNumber = (val: string) => {
+  const formatCardNumber = useCallback((val: string) => {
     const digits = val.replace(/\D/g, "");
     const groups = digits.match(/.{1,4}/g);
     return groups ? groups.join(" ") : digits;
-  };
+  }, []);
 
-  const formatExpiry = (val: string) => {
+  const formatExpiry = useCallback((val: string) => {
     const digits = val.replace(/\D/g, "");
     if (digits.length >= 3) {
       return `${digits.slice(0, 2)}/${digits.slice(2, 4)}`;
     }
     return digits;
-  };
+  }, []);
 
-  const handleInputChange = (field: keyof CardFormState, val: string) => {
-    let finalVal = val;
-    if (field === "cardNumber") {
-      finalVal = formatCardNumber(val).slice(0, 19);
-      const brand = getCardBrand(finalVal.replace(/\s/g, ""));
-      onChange({ ...value, [field]: finalVal, brand });
-    } else if (field === "expiry") {
-      finalVal = formatExpiry(val).slice(0, 5);
-      onChange({ ...value, [field]: finalVal });
-    } else if (field === "cvv") {
-      finalVal = val.replace(/\D/g, "").slice(0, 4);
-      onChange({ ...value, [field]: finalVal });
-    } else if (field === "amount") {
-      finalVal = val.replace(/[^\d.]/g, "");
-      onChange({ ...value, [field]: finalVal });
-    } else {
-      onChange({ ...value, [field]: finalVal });
-    }
-  };
+  const handleInputChange = useCallback(
+    (field: keyof CardFormState, val: string) => {
+      let finalVal = val;
+      if (field === "cardNumber") {
+        finalVal = formatCardNumber(val).slice(0, 19);
+        const brand = getCardBrand(finalVal.replace(/\s/g, ""));
+        onChange({ ...value, [field]: finalVal, brand });
+      } else if (field === "expiry") {
+        finalVal = formatExpiry(val).slice(0, 5);
+        onChange({ ...value, [field]: finalVal });
+      } else if (field === "cvv") {
+        finalVal = val.replace(/\D/g, "").slice(0, 4);
+        onChange({ ...value, [field]: finalVal });
+      } else if (field === "amount") {
+        finalVal = val.replace(/[^\d.]/g, "");
+        onChange({ ...value, [field]: finalVal });
+      } else {
+        onChange({ ...value, [field]: finalVal });
+      }
+    },
+    [value, onChange, formatCardNumber, formatExpiry],
+  );
 
-  const isValid =
-    value.cardNumber.replace(/\s/g, "").length >= 12 &&
-    value.cardholderName.length >= 2 &&
-    value.expiry.length === 5 &&
-    value.cvv.length >= 3 &&
-    parseFloat(value.amount) > 0;
+  const isValid = useMemo(
+    () =>
+      value.cardNumber.replace(/\s/g, "").length >= 12 &&
+      value.cardholderName.length >= 2 &&
+      value.expiry.length === 5 &&
+      value.cvv.length >= 3 &&
+      parseFloat(value.amount) > 0,
+    [value.cardNumber, value.cardholderName, value.expiry, value.cvv, value.amount],
+  );
 
-  const inputClasses = (isFocused: boolean) => `
+  const inputClasses = useCallback(
+    (isFocused: boolean) => `
     w-full bg-input border-2 px-4 py-3.5 rounded-xl text-foreground font-semibold outline-none transition-all duration-300
     ${
       isFocused
@@ -74,7 +81,9 @@ export function CardInput({ value, onChange, onSubmit, disabled }: Props) {
         : "border-border/60 hover:border-border/90 shadow-sm dark:shadow-3d-dark"
     }
     placeholder:text-muted-foreground/30
-  `;
+  `,
+    [],
+  );
 
   const labelClasses =
     "text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/80 mb-1.5 block ml-1";
@@ -222,7 +231,7 @@ export function CardInput({ value, onChange, onSubmit, disabled }: Props) {
             </>
           )}
         </span>
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-[shimmer_2s_infinite]" />
+        <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-[shimmer_2s_infinite]" />
       </motion.button>
     </motion.form>
   );

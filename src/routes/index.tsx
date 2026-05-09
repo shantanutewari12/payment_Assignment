@@ -169,7 +169,7 @@ function Index() {
             className="w-full"
           >
             <div className="rounded-[2rem] sm:rounded-[2.5rem] border border-border bg-card/60 p-4 sm:p-12 shadow-elegant backdrop-blur-md relative overflow-hidden group transition-all duration-500">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+              <div className="absolute inset-0 bg-linear-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
 
               <div className="flex justify-center mb-10 sm:mb-16 relative z-10">
                 <CardPreview
@@ -218,7 +218,7 @@ function Index() {
             <TransactionHistory />
 
             <div className="rounded-[1.5rem] border border-border bg-card/60 p-8 shadow-elegant backdrop-blur-sm relative overflow-hidden group">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+              <div className="absolute inset-0 bg-linear-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
               <div className="flex items-center gap-5 relative z-10">
                 <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary glow-primary">
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -1,6 +1,6 @@
 import { useCallback, useRef } from "react";
 import { MAX_ATTEMPTS, usePaymentStore } from "@/store/paymentStore";
-import type { CardType, PaymentApiResponse, PaymentPayload, Transaction } from "@/types";
+import type { CardType, PaymentPayload, Transaction } from "@/types";
 
 interface SubmitInput {
   cardholderName: string;
@@ -11,7 +11,7 @@ interface SubmitInput {
   brand: CardType;
 }
 
-const TIMEOUT_MS = 6000;
+const SIMULATED_DELAY_MS = 2500;
 
 export function usePayment() {
   const txnIdRef = useRef<string | null>(null);
@@ -34,13 +34,16 @@ export function usePayment() {
     async (input: SubmitInput): Promise<void> => {
       lastInputRef.current = input;
       let txnId = txnIdRef.current;
+
       if (!txnId) {
         txnId = crypto.randomUUID();
         txnIdRef.current = txnId;
         startTransaction(txnId);
       }
+
       const attemptNumber = usePaymentStore.getState().currentAttempt + 1;
       if (attemptNumber > MAX_ATTEMPTS) return;
+
       incrementAttempt();
       setStatus("processing");
 
@@ -66,48 +69,33 @@ export function usePayment() {
         cardholderName: payload.cardholderName,
         brand: input.brand,
       };
+
       upsertTransaction(baseTxn);
 
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+      // Simulation: Wait for processing
+      await new Promise((resolve) => setTimeout(resolve, SIMULATED_DELAY_MS));
 
-      try {
-        const res = await fetch("/api/pay", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify(payload),
-          signal: controller.signal,
-        });
-        clearTimeout(timer);
-        if (!res.ok) throw new Error("network");
-        const data = (await res.json()) as PaymentApiResponse;
-        if (data.success && data.status === "success") {
-          setStatus("success");
-          setFailureReason(null);
-          upsertTransaction({ ...baseTxn, status: "success", attempts: attemptNumber });
-        } else {
-          const reason = data.reason ?? "Payment was declined";
-          setStatus("failed");
-          setFailureReason(reason);
-          upsertTransaction({
-            ...baseTxn,
-            status: "failed",
-            failureReason: reason,
-            attempts: attemptNumber,
-          });
-        }
-      } catch (err) {
-        clearTimeout(timer);
-        const isAbort = err instanceof DOMException && err.name === "AbortError";
-        const status = isAbort ? "timeout" : "failed";
-        const reason = isAbort
-          ? "The request took too long. Please try again."
-          : "We couldn't reach the payment service. Please try again.";
-        setStatus(status);
+      // Simulation: 80% Success Rate, 20% failure on first 2 attempts, then success
+      const isSuccess = Math.random() > 0.2 || attemptNumber === MAX_ATTEMPTS;
+
+      if (isSuccess) {
+        setStatus("success");
+        setFailureReason(null);
+        upsertTransaction({ ...baseTxn, status: "success", attempts: attemptNumber });
+      } else {
+        const failureReasons = [
+          "Insufficient funds in account",
+          "Transaction declined by issuing bank",
+          "Security verification failed",
+          "Daily transaction limit exceeded",
+        ];
+        const reason = failureReasons[Math.floor(Math.random() * failureReasons.length)];
+
+        setStatus("failed");
         setFailureReason(reason);
         upsertTransaction({
           ...baseTxn,
-          status,
+          status: "failed",
           failureReason: reason,
           attempts: attemptNumber,
         });
